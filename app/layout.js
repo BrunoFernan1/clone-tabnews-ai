@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Melyssa Melyssete Ponto Com",
+  title: "Em Construção",
 };
 
 export default function RootLayout({ children }) {
