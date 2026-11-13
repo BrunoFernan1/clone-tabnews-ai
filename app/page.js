@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { connection } from "next/server";
 import Confetti from "./confetti";
 
@@ -23,11 +24,17 @@ async function getTotalContents() {
   }
 }
 
-export default async function Home() {
-  // Garante que a página seja renderizada a cada acesso, e não só no build.
+async function TotalContents() {
+  // Garante que o total seja buscado a cada acesso, e não só no build.
   await connection();
   const totalContents = await getTotalContents();
 
+  return totalContents === null
+    ? "Não foi possível carregar o total de conteúdos publicados no TabNews agora."
+    : `Conteúdos publicados no TabNews: ${totalContents.toLocaleString("pt-BR")}`;
+}
+
+export default function Home() {
   return (
     <main
       style={{
@@ -47,9 +54,12 @@ export default async function Home() {
         com valor concreto
       </p>
       <p>
-        {totalContents === null
-          ? "Não foi possível carregar o total de conteúdos publicados no TabNews agora."
-          : `Conteúdos publicados no TabNews: ${totalContents.toLocaleString("pt-BR")}`}
+        {/* O total depende de uma API externa (até 5 s de timeout). Com o
+            Suspense, o resto da página é enviado na hora e o total chega por
+            streaming quando a API responder. */}
+        <Suspense fallback="Carregando o total de conteúdos publicados no TabNews…">
+          <TotalContents />
+        </Suspense>
       </p>
       <p>
         <a href={TABNEWS_URL}>Visite o site oficial do TabNews</a>
