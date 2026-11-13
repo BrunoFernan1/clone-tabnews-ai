@@ -5,8 +5,14 @@ import ReactConfetti from "react-confetti";
 
 export default function Confetti() {
   const [size, setSize] = useState(null);
+  const [finished, setFinished] = useState(false);
 
   useEffect(() => {
+    // Depois que a animação termina não há mais canvas para redimensionar.
+    if (finished) {
+      return;
+    }
+
     function updateSize() {
       setSize({ width: window.innerWidth, height: window.innerHeight });
     }
@@ -14,9 +20,9 @@ export default function Confetti() {
     updateSize();
     window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
-  }, []);
+  }, [finished]);
 
-  if (!size) {
+  if (finished || !size) {
     return null;
   }
 
@@ -25,6 +31,8 @@ export default function Confetti() {
       width={size.width}
       height={size.height}
       recycle={false}
+      // Remove o canvas, que ocupa a tela inteira, quando o último confete cai.
+      onConfettiComplete={() => setFinished(true)}
       style={{ position: "fixed" }}
     />
   );
